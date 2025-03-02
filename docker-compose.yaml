@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  redis:
+    image: "redis:latest"
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+
+  server1:
+    build: ./server
+    container_name: server1
+    environment:
+      - REDIS_HOST=redis
+    ports:
+      - "8001:5555"
+    networks:
+      - mynetwork
+    depends_on:
+      - redis
+
+  server2:
+    build: ./server
+    container_name: server2
+    environment:
+      - REDIS_HOST=redis
+    ports:
+      - "8002:5555"
+    networks:
+      - mynetwork
+    depends_on:
+      - redis
+
+  device1:
+    build: ./device
+    container_name: device1
+    environment:
+      - SERVER_IP=server1
+      - DEVICE_ID=device1
+    networks:
+      - mynetwork
+    depends_on:
+      - server1
+
+  device2:
+    build: ./device
+    container_name: device2
+    environment:
+      - SERVER_IP=server1
+      - DEVICE_ID=device2
+    networks:
+      - mynetwork
+    depends_on:
+      - server1
+
+  device3:
+    build: ./device
+    container_name: device3
+    environment:
+      - SERVER_IP=server2
+      - DEVICE_ID=device3
+    networks:
+      - mynetwork
+    depends_on:
+      - server2
+
+  device4:
+    build: ./device
+    container_name: device4
+    environment:
+      - SERVER_IP=server2
+      - DEVICE_ID=device4
+    networks:
+      - mynetwork
+    depends_on:
+      - server2
+
+networks:
+  mynetwork:
+    driver: bridge
